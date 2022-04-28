@@ -36,12 +36,12 @@
         "prettier": "^2.6.2",
         "prettier-plugin-solidity": "^1.0.0-beta.19",
         "solhint": "^3.3.7",
-        "@nomiclabs/hardhat-vyper": "^3.0.0", // todo unecessary?
-        "@nomiclabs/hardhat-etherscan": "^3.0.3", // todo unecessary?
-        "@uniswap/v2-core": "^1.0.1", // todo unecessary?
-        "@uniswap/v2-periphery": "^1.1.0-beta.0", // todo unecessary?
-        "hardhat-contract-sizer": "^2.5.1", // todo unecessary?
-        "hardhat-deploy": "^0.11.4" // todo unecessary?
+        "@nomiclabs/hardhat-vyper": "^3.0.0",
+        "@nomiclabs/hardhat-etherscan": "^3.0.3",
+        "@uniswap/v2-core": "^1.0.1",
+        "@uniswap/v2-periphery": "^1.1.0-beta.0",
+        "hardhat-contract-sizer": "^2.5.1",
+        "hardhat-deploy": "^0.11.4"
     },
     "dependencies": {
         "@remix-project/remixd": "^0.6.1",
