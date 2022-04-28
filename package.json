@@ -7,7 +7,8 @@
         "test": "test"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint:sol": "solhint contracts/**/*.sol"
     },
     "repository": {
         "type": "git",
@@ -21,25 +22,26 @@
     },
     "homepage": "https://github.com/thisisarchimedes/Archimedes_Finance#readme",
     "devDependencies": {
-        "@nomiclabs/hardhat-vyper": "^3.0.0",
-        "@nomiclabs/hardhat-etherscan": "^3.0.3",
-        "@uniswap/v2-core": "^1.0.1",
-        "@uniswap/v2-periphery": "^1.1.0-beta.0",
-        "hardhat-contract-sizer": "^2.5.1",
-        "hardhat-deploy": "^0.11.4",
         "@nomiclabs/hardhat-ethers": "^2.0.5",
         "@nomiclabs/hardhat-waffle": "^2.0.3",
         "@openzeppelin/contracts": "^4.6.0",
         "@openzeppelin/test-helpers": "^0.5.15",
         "@tenderly/hardhat-tenderly": "^1.0.13",
         "chai": "^4.3.6",
+        "dotenv": "^16.0.0",
         "ethereum-waffle": "^3.4.4",
         "ethers": "^5.6.4",
         "hardhat": "^2.9.3",
-        "prettier": "^2.6.2",
         "mocha": "^9.2.2",
-        "dotenv": "^16.0.0",
-        "prettier-plugin-solidity": "^1.0.0-beta.19"
+        "prettier": "^2.6.2",
+        "prettier-plugin-solidity": "^1.0.0-beta.19",
+        "solhint": "^3.3.7",
+        "@nomiclabs/hardhat-vyper": "^3.0.0", // todo unecessary?
+        "@nomiclabs/hardhat-etherscan": "^3.0.3", // todo unecessary?
+        "@uniswap/v2-core": "^1.0.1", // todo unecessary?
+        "@uniswap/v2-periphery": "^1.1.0-beta.0", // todo unecessary?
+        "hardhat-contract-sizer": "^2.5.1", // todo unecessary?
+        "hardhat-deploy": "^0.11.4" // todo unecessary?
     },
     "dependencies": {
         "@remix-project/remixd": "^0.6.1",
