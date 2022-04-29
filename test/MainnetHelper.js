@@ -12,6 +12,8 @@ const {
     abiCurve3Pool,
     abi3PoolImplementation,
 } = require("../ABIs");
+const ether = require("@openzeppelin/test-helpers/src/ether");
+const { ethers } = require("hardhat");
 
 // grab the private api key from the private repo
 require("dotenv").config({ path: "secrets/alchemy.env" });
@@ -63,7 +65,7 @@ async function printBalance(ownerName, ownerAddress, cntName, cnt) {
 // @param token: ERC20 token deployed into the pool
 // @param signer: Signer used to deploy / own the pool
 // returns address of the newly created CurveMetaPool
-async function helperCreateCurveMetaPool(token, signer) {
+async function createCurveMetaPool(token, signer) {
     // CurvePool Factory
     const factoryCurveMetaPool = new ethers.Contract(addressCurveFactory, abiCurveFactory, signer);
     const tokenName = await token.symbol();
@@ -89,22 +91,20 @@ async function helperCreateCurveMetaPool(token, signer) {
     );
     // https://curve.readthedocs.io/factory-deployer.html#Factory.find_pool_for_coins
     // We deployed a 3CRV/lvUSD pool - so we ask Curve Factory to look for pools that can deal with USDT/lvUSD
-    addressDeployedMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
-    deployedMetaPoolBalances = await factoryCurveMetaPool.get_coins(addressDeployedMetaPool);
-    console.log("CurveMetaPool deployed with coins:", deployedMetaPoolBalances);
+    addressMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
+    console.log("MainnetHelper: CurveMetaPool deployed at:", addressMetaPool);
 
-    // https://curve.readthedocs.io/factory-pools.html#getting-pool-info
-    const curvePool = await new ethers.Contract(addressDeployedMetaPool, abi3PoolImplementation, signer);
-
-    console.log(await curvePool.decimals());
-
-    return addressDeployedMetaPool;
+    return addressMetaPool;
 }
 
 // Gets the MetaPool by address
-// Returns a Curve "pool" object
-// We use the Crv3 Base Pool, so we can assume the correct ABI: https://curve.readthedocs.io/factory-pools.html#implementation-contracts
-async function getMetaPool(address) {}
+// Returns a Crv3Metapool instance
+// We use the Crv3 Base Pool, so we can assume the correct ABI as given in docs: https://curve.readthedocs.io/factory-pools.html#implementation-contracts
+// @param address: address of the metapool
+// @param user: signer or provider used to interact with pool (owner can write)
+async function getMetaPool(address, user) {
+    return await ethers.getContractAt(abi3PoolImplementation, address, user);
+}
 
 async function helperResetNetwork(lockBlock) {
     // Reset hardhat mainnet fork
@@ -259,7 +259,7 @@ module.exports = {
     helperSwapETHWith3CRV,
     helperSwapETHWithOUSD,
     printBalance,
-    helperCreateCurveMetaPool,
+    createCurveMetaPool,
     noExp,
     getMetaPool,
 
