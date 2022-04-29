@@ -23,13 +23,6 @@ module.exports = {
             });
         return str;
     },
-    printBalance: async function (ownerName, ownerAddress, cntName, cnt) {
-        console.log(
-            `BALANCE: ${ownerName}, cntName: ${cntName}, Balance: ${await cnt.balanceOf(
-                ownerAddress
-            )} `
-        );
-    },
     CURVE_DAO_ADDRESS,
     CRV3_ADDRESS,
     CRV3_POOL_ADDRESS,

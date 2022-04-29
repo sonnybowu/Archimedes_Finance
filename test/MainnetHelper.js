@@ -31,12 +31,68 @@ const indexTripoolWETH9 = 2;
 const indexCurveOUSDOUSD = 0;
 const indexCurveOUSD3CRV = 1;
 
+function noExp(str) {
+    if (typeof str !== "string") str = String(str);
+    if (str.indexOf("e+") === -1) {
+        if (str.indexOf(".") != -1) str = String(Math.floor(Number(str)));
+        return str;
+    }
+    // if number is in scientific notation, pick (b)ase and (p)ower
+    str = str
+        .replace(".", "")
+        .split("e+")
+        .reduce(function (b, p) {
+            return b + Array(p - b.length + 2).join(0);
+        });
+    return str;
+}
+
 function parseUnitsBetweenUSDTAndOUSD(usdtAmount) {
     let balanceOfUSDTInNatural = ethers.utils.formatUnits(usdtBalance, 6);
     return ethers.utils.parseUnits(balanceOfUSDTInNatural, 18);
 }
 
 /* helper functions */
+async function printBalance(ownerName, ownerAddress, cntName, cnt) {
+    console.log(`BALANCE: ${ownerName}, cntName: ${cntName}, Balance: ${await cnt.balanceOf(ownerAddress)} `);
+}
+
+// Spin up a Curve Meta Pool that used Crv3
+// @param token: ERC20 token deployed into the pool
+// @param signer: Signer used to deploy / own the pool
+// returns address of the newly created CurveMetaPool
+async function helperCreateCurveMetaPool(token, signer) {
+    // CurvePool Factory
+    const factoryCurveMetaPool = new ethers.Contract(addressCurveFactory, abiCurveFactory, signer);
+    const tokenName = await token.symbol();
+    const poolSymbol = tokenName + "+3Crv";
+
+    console.log("tokenName, poolSymbol, token.address", tokenName, poolSymbol, token.address);
+
+    // examples on Mainnet: https://etherscan.io/address/0xB9fC157394Af804a3578134A6585C0dc9cc990d4?method=Deploy_metapool~de7fe3bf
+    // https://curve.readthedocs.io/factory-deployer.html#Factory.deploy_metapool
+    /*
+    _base_pool: Address of the base pool to use within the new metapool.
+    _name: Name of the new metapool.
+    _symbol: Symbol for the new metapool’s LP token. This value will be concatenated with the base pool symbol.
+    _coin: Address of the coin being used in the metapool
+    _A: Amplification coefficient
+    _fee: Trade fee, given as an integer with 1e10 precision.
+    */
+    tx = await factoryCurveMetaPool.deploy_metapool(
+        addressCurve3Pool,
+        tokenName,
+        poolSymbol,
+        token.address,
+        2000,
+        4000000
+    );
+    // https://curve.readthedocs.io/factory-deployer.html#Factory.find_pool_for_coins
+    // We deployed a 3CRV/lvUSD pool - so we ask Curve Factory to look for pools that can deal with USDT/lvUSD
+    addressDeployedMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
+    return addressDeployedMetaPool;
+}
+
 async function helperResetNetwork(lockBlock) {
     // Reset hardhat mainnet fork
     await network.provider.request({
@@ -189,6 +245,9 @@ module.exports = {
     helperSwapETHWithUSDT,
     helperSwapETHWith3CRV,
     helperSwapETHWithOUSD,
+    printBalance,
+    helperCreateCurveMetaPool,
+    noExp,
 
     /* addresses */
     addressCurveTripool2,

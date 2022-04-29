@@ -2,35 +2,7 @@
 const { expect, assert } = require("chai");
 const hre = require("hardhat");
 const util = require("util");
-
-function noExp(str) {
-    if (typeof str !== "string") str = String(str);
-    if (str.indexOf("e+") === -1) {
-        if (str.indexOf(".") != -1) str = String(Math.floor(Number(str)));
-        return str;
-    }
-
-    // if number is in scientific notation, pick (b)ase and (p)ower
-    str = str
-        .replace(".", "")
-        .split("e+")
-        .reduce(function (b, p) {
-            return b + Array(p - b.length + 2).join(0);
-        });
-    return str;
-}
-
-async function printBalance(ownerName, ownerAddress, cntName, cnt) {
-    console.log(
-        `BALANCE: ${ownerName}, cntName: ${cntName}, Balance: ${await cnt.balanceOf(
-            ownerAddress
-        )} `
-    );
-}
-
-function mm(x) {
-    return noExp(x * 10 ** 6);
-}
+const MainnetHelper = require("./MainnetHelper");
 
 const CURVE_DAO_ADDRESS = "0xD533a949740bb3306d119CC777fa900bA034cd52";
 const CRV3_ADDRESS = "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490";
@@ -45,7 +17,7 @@ describe("Test Pools Rewards", () => {
     let tUSD_metapool_coin;
     let metaPool;
     let stakingRewards;
-    const mm10 = noExp(10 ** 7);
+    const mm10 = MainnetHelper.noExp(10 ** 7);
     let adminWallet, walletA;
     let ERC20, POOL3, METAPOOL, CRV3, CurveDAO, StakingRewards, TokenMinter;
     let tUSD, tGOV, crv3, weth, curveFactory;
@@ -77,7 +49,7 @@ describe("Test Pools Rewards", () => {
         tUSD = await ERC20.deploy("tUSD", "tUSD");
         tGOV = await ERC20.deploy("tGOV", "tGOV");
         weth = await WETH9.deploy();
-        await weth.deposit({ value: noExp(10 ** 30) });
+        await weth.deposit({ value: MainnetHelper.noExp(10 ** 30) });
 
         tUSD_metapool_coin = await CRV3.deploy("tUSDPool", "tUSDPool", "18", 0);
         crv3 = await CRV3.attach(CRV3_ADDRESS);
@@ -100,12 +72,8 @@ describe("Test Pools Rewards", () => {
             console.log("Uniswap ETH pool part1");
 
             //factory = await Factory.deploy(adminWallet.address);
-            factory = await Factory.attach(
-                "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
-            );
-            router = await Router.attach(
-                "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
-            );
+            factory = await Factory.attach("0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f");
+            router = await Router.attach("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
             console.log("Uniswap ETH pool part2");
             //router = await Router.deploy(factory.address, weth.address);
 
@@ -115,39 +83,35 @@ describe("Test Pools Rewards", () => {
 
             let pool = await Pair.attach(poolAddress);
 
-            console.log(
-                `pool token = ${util.inspect(
-                    await pool.balanceOf(pool.address)
-                )}`
-            );
+            console.log(`pool token = ${util.inspect(await pool.balanceOf(pool.address))}`);
 
-            const mm2 = noExp(10 ** 18 * 2 * 10 ** 6);
-            const mm3 = noExp(10 ** 18 * 3 * 10 ** 6);
-            const mm1 = noExp(Math.floor(10 ** 14));
-            let balanceSend = noExp(10 ** 18 * 100);
+            const mm2 = MainnetHelper.noExp(10 ** 18 * 2 * 10 ** 6);
+            const mm3 = MainnetHelper.noExp(10 ** 18 * 3 * 10 ** 6);
+            const mm1 = MainnetHelper.noExp(Math.floor(10 ** 14));
+            let balanceSend = MainnetHelper.noExp(10 ** 18 * 100);
             await tUSD.transfer(walletA.address, balanceSend);
 
             console.log(`transfer tUSD to UserA balance ${balanceSend}`);
-            await printBalance("UserA", walletA.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("UserA", walletA.address, "tUSD", tUSD);
 
-            await tUSD.approve(router.address, noExp(10 ** 50));
-            await weth.approve(router.address, noExp(10 ** 50));
+            await tUSD.approve(router.address, MainnetHelper.noExp(10 ** 50));
+            await weth.approve(router.address, MainnetHelper.noExp(10 ** 50));
 
             let amt0 = 10 ** (6 + 18) * 2;
             let amt1 = 10 ** (6 + 18) * 2;
             console.log("\n--------------------");
             console.log("before liquidity add");
 
-            await printBalance("admin", adminWallet.address, "tUSD", tUSD);
-            await printBalance("admin", adminWallet.address, "weth", weth);
+            await MainnetHelper.printBalance("admin", adminWallet.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("admin", adminWallet.address, "weth", weth);
 
-            await printBalance("pool", pool.address, "tUSD", tUSD);
-            await printBalance("pool", pool.address, "weth", weth);
+            await MainnetHelper.printBalance("pool", pool.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("pool", pool.address, "weth", weth);
             await router.addLiquidity(
                 weth.address,
                 tUSD.address,
-                noExp(amt0),
-                noExp(amt1),
+                MainnetHelper.noExp(amt0),
+                MainnetHelper.noExp(amt1),
                 0,
                 0,
                 adminWallet.address,
@@ -155,28 +119,24 @@ describe("Test Pools Rewards", () => {
             );
 
             console.log("after liquidity add");
-            await printBalance("pool", pool.address, "tUSD", tUSD);
-            await printBalance("pool", pool.address, "weth", weth);
+            await MainnetHelper.printBalance("pool", pool.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("pool", pool.address, "weth", weth);
 
             expect(Number(await tUSD.balanceOf(pool.address))).to.eq(amt0);
-            expect(Number(await weth.balanceOf(pool.address))).to.eq(
-                Number(amt1)
-            );
+            expect(Number(await weth.balanceOf(pool.address))).to.eq(Number(amt1));
             console.log("end liquidity add");
             console.log("--------------------\n");
 
             console.log("--------------------");
             console.log("Before Swap ");
-            await printBalance("UserA", walletA.address, "tUSD", tUSD);
-            await printBalance("UserA", walletA.address, "weth", weth);
+            await MainnetHelper.printBalance("UserA", walletA.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("UserA", walletA.address, "weth", weth);
 
-            await tUSD
-                .connect(walletA)
-                .approve(router.address, noExp(10 ** 50));
+            await tUSD.connect(walletA).approve(router.address, MainnetHelper.noExp(10 ** 50));
             await router
                 .connect(walletA)
                 .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    noExp(balanceSend),
+                    MainnetHelper.noExp(balanceSend),
                     0,
                     [tUSD.address, weth.address],
                     walletA.address,
@@ -184,8 +144,8 @@ describe("Test Pools Rewards", () => {
                 );
 
             console.log("After Swap ");
-            await printBalance("UserA", walletA.address, "tUSD", tUSD);
-            await printBalance("UserA", walletA.address, "weth", weth);
+            await MainnetHelper.printBalance("UserA", walletA.address, "tUSD", tUSD);
+            await MainnetHelper.printBalance("UserA", walletA.address, "weth", weth);
             expect(await tUSD.balanceOf(walletA.address)).to.eq(0);
 
             console.log("End Swap ");
@@ -193,11 +153,7 @@ describe("Test Pools Rewards", () => {
 
             const twoWeeks = 1209600;
 
-            console.log(
-                `metaPoolToken balance adminWallet: ${await pool.balanceOf(
-                    adminWallet.address
-                )}`
-            );
+            console.log(`metaPoolToken balance adminWallet: ${await pool.balanceOf(adminWallet.address)}`);
 
             stakingRewards = await StakingRewards.deploy(
                 adminWallet.address,
@@ -206,38 +162,25 @@ describe("Test Pools Rewards", () => {
                 pool.address,
                 twoWeeks
             );
-            await tGOV.approve(stakingRewards.address, noExp(10 ** 50));
+            await tGOV.approve(stakingRewards.address, MainnetHelper.noExp(10 ** 50));
 
             // notifyRewardsAmount deposits rewards into the rewards contract
             // with 1 million tGOV
             const rewardAmt = 10 ** 18 * 10 ** 6;
             let resultStaking = await stakingRewards.notifyRewardAmount(
-                noExp(rewardAmt),
+                MainnetHelper.noExp(rewardAmt),
                 adminWallet.address
             );
-            await pool.approve(stakingRewards.address, noExp(10 ** 40));
-            await stakingRewards.stake(
-                await pool.balanceOf(adminWallet.address)
-            );
+            await pool.approve(stakingRewards.address, MainnetHelper.noExp(10 ** 40));
+            await stakingRewards.stake(await pool.balanceOf(adminWallet.address));
 
-            expect(
-                await tUSD_metapool_coin.balanceOf(adminWallet.address)
-            ).to.eq(0);
-            console.log(
-                `balance before ${await tUSD_metapool_coin.balanceOf(
-                    adminWallet.address
-                )}`
-            );
+            expect(await tUSD_metapool_coin.balanceOf(adminWallet.address)).to.eq(0);
+            console.log(`balance before ${await tUSD_metapool_coin.balanceOf(adminWallet.address)}`);
 
             const secBetweenBlocks = 14;
             let blockBefore = await ethers.provider.getBlock();
 
-            await printBalance(
-                "stakingRewards",
-                stakingRewards.address,
-                "tGOV",
-                tGOV
-            );
+            await MainnetHelper.printBalance("stakingRewards", stakingRewards.address, "tGOV", tGOV);
 
             const startTimestamp = (await ethers.provider.getBlock()).timestamp;
             await hre.network.provider.send("hardhat_mine", [
@@ -246,12 +189,7 @@ describe("Test Pools Rewards", () => {
             ]);
             console.log("\nSTART SIMULATE REWARDS");
             console.log("--------------------------");
-            const blockSteps = [
-                50,
-                450,
-                4500,
-                twoWeeks / secBetweenBlocks + 100,
-            ];
+            const blockSteps = [50, 450, 4500, twoWeeks / secBetweenBlocks + 100];
             let blockTime;
             let blockNum = 0;
             for (let i = 0; i < blockSteps.length; ++i) {
@@ -262,13 +200,10 @@ describe("Test Pools Rewards", () => {
                 blockNum += blockSteps[i];
                 blockTime = (await ethers.provider.getBlock()).timestamp;
                 console.log(
-                    `after ${blockNum} and ${(
-                        (blockTime - startTimestamp) /
-                        3600 /
-                        24
-                    ).toFixed(2)} days, Prct rewards earned: ${(
-                        ((await stakingRewards.earned(adminWallet.address)) /
-                            rewardAmt) *
+                    `after ${blockNum} and ${((blockTime - startTimestamp) / 3600 / 24).toFixed(
+                        2
+                    )} days, Prct rewards earned: ${(
+                        ((await stakingRewards.earned(adminWallet.address)) / rewardAmt) *
                         100
                     ).toFixed(6)}%`
                 );
@@ -276,18 +211,11 @@ describe("Test Pools Rewards", () => {
             console.log("--------------------------");
             console.log("END SIMULATE REWARDS \n");
 
-            await printBalance("admin", adminWallet.address, "tGOV", tGOV);
+            await MainnetHelper.printBalance("admin", adminWallet.address, "tGOV", tGOV);
             await stakingRewards.getReward();
-            await printBalance("admin", adminWallet.address, "tGOV", tGOV);
-            await printBalance(
-                "stakingRewards",
-                stakingRewards.address,
-                "tGOV",
-                tGOV
-            );
-            expect(
-                (await tGOV.balanceOf(stakingRewards.address)) / rewardAmt
-            ).to.be.at.most(0.00001);
+            await MainnetHelper.printBalance("admin", adminWallet.address, "tGOV", tGOV);
+            await MainnetHelper.printBalance("stakingRewards", stakingRewards.address, "tGOV", tGOV);
+            expect((await tGOV.balanceOf(stakingRewards.address)) / rewardAmt).to.be.at.most(0.00001);
 
             return;
         });
