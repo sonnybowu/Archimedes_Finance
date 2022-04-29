@@ -67,7 +67,7 @@ async function printBalance(ownerName, ownerAddress, cntName, cnt) {
 // returns address of the newly created CurveMetaPool
 async function createCurveMetaPool(token, signer) {
     // CurvePool Factory
-    const factoryCurveMetaPool = new ethers.Contract(addressCurveFactory, abiCurveFactory, signer);
+    const factoryCurveMetapool = new ethers.Contract(addressCurveFactory, abiCurveFactory, signer);
     const tokenName = await token.symbol();
     const poolSymbol = tokenName + "+3Crv";
 
@@ -81,20 +81,12 @@ async function createCurveMetaPool(token, signer) {
     _A: Amplification coefficient
     _fee: Trade fee, given as an integer with 1e10 precision.
     */
-    tx = await factoryCurveMetaPool.deploy_metapool(
-        addressCurve3Pool,
-        tokenName,
-        poolSymbol,
-        token.address,
-        2000,
-        4000000
-    );
+    await factoryCurveMetapool.deploy_metapool(addressCurve3Pool, tokenName, poolSymbol, token.address, 1337, 4000000);
     // https://curve.readthedocs.io/factory-deployer.html#Factory.find_pool_for_coins
     // We deployed a 3CRV/lvUSD pool - so we ask Curve Factory to look for pools that can deal with USDT/lvUSD
-    addressMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
-    console.log("MainnetHelper: CurveMetaPool deployed at:", addressMetaPool);
-
-    return addressMetaPool;
+    const poolAddress = await factoryCurveMetapool.find_pool_for_coins(addressUSDT, token.address);
+    // Return the pool object
+    return await getMetaPool(poolAddress, signer);
 }
 
 // Gets the MetaPool by address

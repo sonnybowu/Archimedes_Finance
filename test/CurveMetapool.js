@@ -2,27 +2,23 @@ const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 const { abiCurveFactory } = require("../ABIs");
 const MainnetHelper = require("./MainnetHelper");
+const { ContractTestContext } = require("./ContractTestContext");
 
 describe("CurveMetapool", () => {
     let adminWallet, walletA;
-    let decimals;
-    let metaPool;
-    beforeEach("Deploy contracts", async () => {
+    let pool;
+    before(async () => {
         [adminWallet, walletA] = await ethers.getSigners();
-        // Our ERC20 Token
-        const factorylvUSDToken = await ethers.getContractFactory("LvUSDToken");
-        const lvUSDToken = await factorylvUSDToken.deploy();
-        await lvUSDToken.deployed();
-        // Create Curve Metapool. Returns address
-        const addressMetaPool = await MainnetHelper.createCurveMetaPool(lvUSDToken, adminWallet);
-        // Get pool by address
+        // Setup various contracts including lvUSD
+        r = new ContractTestContext();
+        await r.setup();
+        // Create Curve Metapool. Returns pool object
+        pool = await MainnetHelper.createCurveMetaPool(r.lvUSD, adminWallet);
     });
 
-    describe("Metapool Creation", () => {
-        it("has expected decimals", async () => {
-            metaPool = await MainnetHelper.getMetaPool(addressMetaPool, adminWallet);
-            decimals = await metaPool.decimals();
-            expect(decimals).to.eq(18);
+    describe("Creation", () => {
+        it("has expected A() value", async () => {
+            expect(await pool.A()).to.eq(1337);
         });
         it("only owner can write to it", async () => {});
     });
