@@ -12,7 +12,6 @@ const {
     abiCurve3Pool,
     abi3PoolImplementation,
 } = require("../ABIs");
-const { ethers } = require("hardhat");
 
 // grab the private api key from the private repo
 require("dotenv").config({ path: "secrets/alchemy.env" });
@@ -91,8 +90,13 @@ async function helperCreateCurveMetaPool(token, signer) {
     // https://curve.readthedocs.io/factory-deployer.html#Factory.find_pool_for_coins
     // We deployed a 3CRV/lvUSD pool - so we ask Curve Factory to look for pools that can deal with USDT/lvUSD
     addressDeployedMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
-    deployedMetaPoolBalances = await factoryCurveMetaPool.get_balances(addressDeployedMetaPool);
-    console.log("CurveMetaPool deployed with balances:", deployedMetaPoolBalances);
+    deployedMetaPoolBalances = await factoryCurveMetaPool.get_coins(addressDeployedMetaPool);
+    console.log("CurveMetaPool deployed with coins:", deployedMetaPoolBalances);
+
+    // https://curve.readthedocs.io/factory-pools.html#getting-pool-info
+    const curvePool = await new ethers.Contract(addressDeployedMetaPool, abi3PoolImplementation, signer);
+
+    console.log(await curvePool.decimals());
 
     return addressDeployedMetaPool;
 }
