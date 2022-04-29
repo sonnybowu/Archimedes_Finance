@@ -10,7 +10,9 @@ const {
     abiCurveFactory,
     abi3CRVToken,
     abiCurve3Pool,
+    abi3PoolImplementation,
 } = require("../ABIs");
+const { ethers } = require("hardhat");
 
 // grab the private api key from the private repo
 require("dotenv").config({ path: "secrets/alchemy.env" });
@@ -25,6 +27,7 @@ const addressCurve3Pool = "0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7";
 const addressCurveOUSDPool = "0x87650D7bbfC3A9F10587d7778206671719d9910D";
 const addressOUSD = "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86";
 const address3CRV = "0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490";
+const address3PoolImplementation = "0x5F890841f657d90E081bAbdB532A05996Af79Fe6";
 
 const indexTripoolUSDT = 0;
 const indexTripoolWETH9 = 2;
@@ -67,8 +70,6 @@ async function helperCreateCurveMetaPool(token, signer) {
     const tokenName = await token.symbol();
     const poolSymbol = tokenName + "+3Crv";
 
-    console.log("tokenName, poolSymbol, token.address", tokenName, poolSymbol, token.address);
-
     // examples on Mainnet: https://etherscan.io/address/0xB9fC157394Af804a3578134A6585C0dc9cc990d4?method=Deploy_metapool~de7fe3bf
     // https://curve.readthedocs.io/factory-deployer.html#Factory.deploy_metapool
     /*
@@ -90,8 +91,16 @@ async function helperCreateCurveMetaPool(token, signer) {
     // https://curve.readthedocs.io/factory-deployer.html#Factory.find_pool_for_coins
     // We deployed a 3CRV/lvUSD pool - so we ask Curve Factory to look for pools that can deal with USDT/lvUSD
     addressDeployedMetaPool = await factoryCurveMetaPool.find_pool_for_coins(addressUSDT, token.address);
+    deployedMetaPoolBalances = await factoryCurveMetaPool.get_balances(addressDeployedMetaPool);
+    console.log("CurveMetaPool deployed with balances:", deployedMetaPoolBalances);
+
     return addressDeployedMetaPool;
 }
+
+// Gets the MetaPool by address
+// Returns a Curve "pool" object
+// We use the Crv3 Base Pool, so we can assume the correct ABI: https://curve.readthedocs.io/factory-pools.html#implementation-contracts
+async function getMetaPool(address) {}
 
 async function helperResetNetwork(lockBlock) {
     // Reset hardhat mainnet fork
@@ -248,6 +257,7 @@ module.exports = {
     printBalance,
     helperCreateCurveMetaPool,
     noExp,
+    getMetaPool,
 
     /* addresses */
     addressCurveTripool2,
@@ -258,6 +268,7 @@ module.exports = {
     addressCurveOUSDPool,
     addressOUSD,
     address3CRV,
+    address3PoolImplementation,
 
     /* ABIs */
     abiOUSDToken,
@@ -268,6 +279,7 @@ module.exports = {
     abiCurveFactory,
     abi3CRVToken,
     abiCurve3Pool,
+    abi3PoolImplementation,
 
     /* other */
     indexTripoolUSDT,
