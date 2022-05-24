@@ -90,7 +90,7 @@ contract LeverageEngine is ReentrancyGuard, AccessControl {
         console.log("CLP: positionTokenId %s", positionTokenId);
         console.log("CLP: msg.sender is %s, coordinator is %s", msg.sender, _addressCoordinator);
         _ousd.safeTransferFrom(msg.sender, _addressCoordinator, ousdPrinciple);
-        console.log("CLP: after transfer of %s principle OUSD to coordinator", ousdPrinciple/ 1 ether);
+        console.log("CLP: after transfer of %s principle OUSD to coordinator", ousdPrinciple / 1 ether);
         _coordinator.depositCollateralUnderNFT(positionTokenId, ousdPrinciple);
         console.log("CLP: after depositCollateralUnderNFT");
         _coordinator.getLeveragedOUSD(positionTokenId, lvUSDAmount);
