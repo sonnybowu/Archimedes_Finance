@@ -227,48 +227,48 @@ describe("Coordinator Test suit", function () {
                 });
                 // Commenting out till exchanger is done as unwind would not work yet
 
-                // describe("Unwind leveraged position", function () {
-                //     let vaultOUSDAmountBeforeUnwind;
-                //     let positionShares;
-                //     let positionTotalOUSD;
-                //     let positionExpectedOUSDTotalPlusInterest;
-                //     let positionInterestEarned;
+                describe("Unwind leveraged position", function () {
+                    let vaultOUSDAmountBeforeUnwind;
+                    let positionShares;
+                    let positionTotalOUSD;
+                    let positionExpectedOUSDTotalPlusInterest;
+                    let positionInterestEarned;
 
-                //     let userExistingOUSDValueBeforeUnwind;
-                //     before(async function () {
-                //         vaultOUSDAmountBeforeUnwind = await r.vault.totalAssets();
-                //         positionTotalOUSD = await r.cdp.getOUSDTotal(nftIdFirstPosition);
-                //         positionShares = await r.cdp.getShares(nftIdFirstPosition);
-                //         positionExpectedOUSDTotalPlusInterest = await r.vault.convertToAssets(positionShares);
-                //         positionInterestEarned = positionExpectedOUSDTotalPlusInterest.sub(positionTotalOUSD);
-                //         userExistingOUSDValueBeforeUnwind = await r.externalOUSD.balanceOf(endUserSigner.address);
+                    let userExistingOUSDValueBeforeUnwind;
+                    before(async function () {
+                        vaultOUSDAmountBeforeUnwind = await r.vault.totalAssets();
+                        positionTotalOUSD = await r.cdp.getOUSDTotal(nftIdFirstPosition);
+                        positionShares = await r.cdp.getShares(nftIdFirstPosition);
+                        positionExpectedOUSDTotalPlusInterest = await r.vault.convertToAssets(positionShares);
+                        positionInterestEarned = positionExpectedOUSDTotalPlusInterest.sub(positionTotalOUSD);
+                        userExistingOUSDValueBeforeUnwind = await r.externalOUSD.balanceOf(endUserSigner.address);
 
-                //         await coordinator.unwindLeveragedOUSD(nftIdFirstPosition, endUserSigner.address);
-                //     });
+                        await coordinator.unwindLeveragedOUSD(nftIdFirstPosition, endUserSigner.address);
+                    });
 
-                //     it(`Should reduce assets in Vault by the entire OUSD amount of
-                //         position (principle, leveraged and interest)`, async function () {
-                //         expect(await r.vault.totalAssets()).to.equal(
-                //             vaultOUSDAmountBeforeUnwind.sub(positionExpectedOUSDTotalPlusInterest));
-                //     });
-                //     it("Should transfer principle plus interest to user", async function () {
-                //         const userExpectedOUSDBalance = parseFloat(ethers.utils.formatEther(
-                //             addr1CollateralAmount.add(positionInterestEarned).add(userExistingOUSDValueBeforeUnwind).sub(originationFee)));
-                //         const userActualOUSDBalance = parseFloat(ethers.utils.formatEther(
-                //             await r.externalOUSD.balanceOf(endUserSigner.address)));
-                //         expect(userActualOUSDBalance).to.be.closeTo(
-                //             userExpectedOUSDBalance, 1.5);
-                //     });
-                //     it("Should have deleted CDP position", async function () {
-                //         /// a view method does not revert but just throw an exception.
-                //         try {
-                //             await r.cdp.getOUSDPrinciple(nftIdFirstPosition);
-                //             assert.fail("Error - Getting CDP OUSD Principle on a deleted position must throw exception");
-                //         } catch (e) {}
-                //     });
+                    it(`Should reduce assets in Vault by the entire OUSD amount of
+                        position (principle, leveraged and interest)`, async function () {
+                        expect(await r.vault.totalAssets()).to.equal(
+                            vaultOUSDAmountBeforeUnwind.sub(positionExpectedOUSDTotalPlusInterest));
+                    });
+                    it("Should transfer principle plus interest to user", async function () {
+                        const userExpectedOUSDBalance = parseFloat(ethers.utils.formatEther(
+                            addr1CollateralAmount.add(positionInterestEarned).add(userExistingOUSDValueBeforeUnwind).sub(originationFee)));
+                        const userActualOUSDBalance = parseFloat(ethers.utils.formatEther(
+                            await r.externalOUSD.balanceOf(endUserSigner.address)));
+                        expect(userActualOUSDBalance).to.be.closeTo(
+                            userExpectedOUSDBalance, 1.5);
+                    });
+                    it("Should have deleted CDP position", async function () {
+                        /// a view method does not revert but just throw an exception.
+                        try {
+                            await r.cdp.getOUSDPrinciple(nftIdFirstPosition);
+                            assert.fail("Error - Getting CDP OUSD Principle on a deleted position must throw exception");
+                        } catch (e) {}
+                    });
 
-                //     // TODO : Once exchanger is up, need to check that lvUSD was returned to coordinator address
-                // });
+                    // TODO : Once exchanger is up, need to check that lvUSD was returned to coordinator address
+                });
             });
         });
     });
