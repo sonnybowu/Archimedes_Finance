@@ -57,10 +57,6 @@ async function main () {
     console.log("approved pool to be funded");
     const pool = await getMetapool(addressPool, owner);
     console.log("get pool");
-    await pool.add_liquidity([fundedPoolAmount, fundedPoolAmount], 1, owner.address, {
-        gasPrice: 250000000000,
-        gas: 21000,
-    });
 }
 
 // We recommend this pattern to be able to use async/await everywhere
